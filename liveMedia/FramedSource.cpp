@@ -27,6 +27,7 @@ FramedSource::FramedSource(UsageEnvironment& env)
   : MediaSource(env),
     fAfterGettingFunc(NULL), fAfterGettingClientData(NULL),
     fOnCloseFunc(NULL), fOnCloseClientData(NULL),
+    fAfterGettingPacketFunc(NULL),
     fIsCurrentlyAwaitingData(False) {
   fPresentationTime.tv_sec = fPresentationTime.tv_usec = 0; // initially
 }
@@ -58,7 +59,8 @@ void FramedSource::getNextFrame(unsigned char* to, unsigned maxSize,
 				afterGettingFunc* afterGettingFunc,
 				void* afterGettingClientData,
 				onCloseFunc* onCloseFunc,
-				void* onCloseClientData) {
+				void* onCloseClientData,
+        afterGettingPacketFunc* afterGettingPacketFunc) {
   // Make sure we're not already being read:
   if (fIsCurrentlyAwaitingData) {
     envir() << "FramedSource[" << this << "]::getNextFrame(): attempting to read more than once at the same time!\n";
@@ -73,6 +75,7 @@ void FramedSource::getNextFrame(unsigned char* to, unsigned maxSize,
   fAfterGettingClientData = afterGettingClientData;
   fOnCloseFunc = onCloseFunc;
   fOnCloseClientData = onCloseClientData;
+  fAfterGettingPacketFunc = afterGettingPacketFunc;
   fIsCurrentlyAwaitingData = True;
 
   doGetNextFrame();
@@ -90,6 +93,14 @@ void FramedSource::afterGetting(FramedSource* source) {
 				   source->fFrameSize, source->fNumTruncatedBytes,
 				   source->fPresentationTime,
 				   source->fDurationInMicroseconds);
+  }
+}
+
+void FramedSource::afterGettingPacket(FramedSource* source, char* packetData, unsigned packetSize)
+{
+  if (source->fAfterGettingPacketFunc != NULL) {
+    (*(source->fAfterGettingPacketFunc))(source->fAfterGettingClientData,
+          packetData, packetSize);
   }
 }
 

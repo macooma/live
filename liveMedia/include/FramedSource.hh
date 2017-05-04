@@ -38,11 +38,14 @@ public:
 				  struct timeval presentationTime,
 				  unsigned durationInMicroseconds);
   typedef void (onCloseFunc)(void* clientData);
+  typedef void (afterGettingPacketFunc)(void* clientData, char* packetData,
+          unsigned packetSize);
   void getNextFrame(unsigned char* to, unsigned maxSize,
 		    afterGettingFunc* afterGettingFunc,
 		    void* afterGettingClientData,
 		    onCloseFunc* onCloseFunc,
-		    void* onCloseClientData);
+		    void* onCloseClientData,
+        afterGettingPacketFunc* afterGettingPacketFunc = NULL);
 
   static void handleClosure(void* clientData);
   void handleClosure();
@@ -63,6 +66,7 @@ public:
   static void afterGetting(FramedSource* source);
       // doGetNextFrame() should arrange for this to be called after the
       // frame has been read (*iff* it is read successfully)
+  static void afterGettingPacket(FramedSource* source, char* packetData, unsigned packetSize);
 
 protected:
   FramedSource(UsageEnvironment& env); // abstract base class
@@ -88,6 +92,7 @@ private:
   void* fAfterGettingClientData;
   onCloseFunc* fOnCloseFunc;
   void* fOnCloseClientData;
+  afterGettingPacketFunc* fAfterGettingPacketFunc;
 
   Boolean fIsCurrentlyAwaitingData;
 };

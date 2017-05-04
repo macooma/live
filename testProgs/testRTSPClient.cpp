@@ -153,6 +153,9 @@ private:
   void afterGettingFrame(unsigned frameSize, unsigned numTruncatedBytes,
 			 struct timeval presentationTime, unsigned durationInMicroseconds);
 
+  static void afterGettingPacket(void* clientData, char* packetData, unsigned packetSize);
+  void afterGettingPacket(char* packetData, unsigned packetSize);
+
 private:
   // redefined virtual functions:
   virtual Boolean continuePlaying();
@@ -161,6 +164,7 @@ private:
   u_int8_t* fReceiveBuffer;
   MediaSubsession& fSubsession;
   char* fStreamId;
+  u_int16_t fLastRTPSeq;
 };
 
 #define RTSP_CLIENT_VERBOSITY_LEVEL 1 // by default, print verbose output from each "RTSPClient"
@@ -226,7 +230,7 @@ void continueAfterDESCRIBE(RTSPClient* rtspClient, int resultCode, char* resultS
 
 // By default, we request that the server stream its data using RTP/UDP.
 // If, instead, you want to request that the server stream via RTP-over-TCP, change the following to True:
-#define REQUEST_STREAMING_OVER_TCP False
+#define REQUEST_STREAMING_OVER_TCP True
 
 void setupNextSubsession(RTSPClient* rtspClient) {
   UsageEnvironment& env = rtspClient->envir(); // alias
@@ -470,7 +474,7 @@ StreamClientState::~StreamClientState() {
 
 // Even though we're not going to be doing anything with the incoming data, we still need to receive it.
 // Define the size of the buffer that we'll use:
-#define DUMMY_SINK_RECEIVE_BUFFER_SIZE 100000
+#define DUMMY_SINK_RECEIVE_BUFFER_SIZE 1000000
 
 DummySink* DummySink::createNew(UsageEnvironment& env, MediaSubsession& subsession, char const* streamId) {
   return new DummySink(env, subsession, streamId);
@@ -481,6 +485,7 @@ DummySink::DummySink(UsageEnvironment& env, MediaSubsession& subsession, char co
     fSubsession(subsession) {
   fStreamId = strDup(streamId);
   fReceiveBuffer = new u_int8_t[DUMMY_SINK_RECEIVE_BUFFER_SIZE];
+  fLastRTPSeq = 0;
 }
 
 DummySink::~DummySink() {
@@ -495,7 +500,7 @@ void DummySink::afterGettingFrame(void* clientData, unsigned frameSize, unsigned
 }
 
 // If you don't want to see debugging output for each received frame, then comment out the following line:
-#define DEBUG_PRINT_EACH_RECEIVED_FRAME 1
+//#define DEBUG_PRINT_EACH_RECEIVED_FRAME 1
 
 void DummySink::afterGettingFrame(unsigned frameSize, unsigned numTruncatedBytes,
 				  struct timeval presentationTime, unsigned /*durationInMicroseconds*/) {
@@ -520,12 +525,36 @@ void DummySink::afterGettingFrame(unsigned frameSize, unsigned numTruncatedBytes
   continuePlaying();
 }
 
+// static
+void DummySink::afterGettingPacket(void* clientData, char* packetData, unsigned packetSize)
+{
+  DummySink* sink = (DummySink*)clientData;
+  sink->afterGettingPacket(packetData, packetSize);
+}
+
+void DummySink::afterGettingPacket(char* packetData, unsigned packetSize)
+{
+  u_int16_t* seqNumPtr = (u_int16_t*)packetData;
+  if (fLastRTPSeq != 0)
+  {
+    if (ntohs(seqNumPtr[1]) - fLastRTPSeq > 1)
+    {
+      printf("::: %u packets lost :::\n", ntohs(seqNumPtr[1]) - fLastRTPSeq - 1);
+    }
+  }
+  fLastRTPSeq = ntohs(seqNumPtr[1]);
+
+  if (ntohs(seqNumPtr[1]) % 100 == 0)
+    printf("Rec RTP seq: %u\n", ntohs(seqNumPtr[1]));
+}
+
 Boolean DummySink::continuePlaying() {
   if (fSource == NULL) return False; // sanity check (should not happen)
 
   // Request the next frame of data from our input source.  "afterGettingFrame()" will get called later, when it arrives:
   fSource->getNextFrame(fReceiveBuffer, DUMMY_SINK_RECEIVE_BUFFER_SIZE,
                         afterGettingFrame, this,
-                        onSourceClosure, this);
+                        onSourceClosure, this,
+                        afterGettingPacket);
   return True;
 }
