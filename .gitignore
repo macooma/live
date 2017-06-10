@@ -35,3 +35,5 @@ testProgs/testReplicator
 testProgs/testWAVAudioStreamer
 testProgs/vobStreamer
 testProgs/testLiveRTSPSession
+testProgs/testMPEG2TransportUDPReceiver
+testProgs/testMPEG2TransportUDPStreamer
