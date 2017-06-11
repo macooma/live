@@ -49,6 +49,8 @@ void setupNextSubsession(RTSPClient* rtspClient);
 // Used to shut down and close a stream (including its "RTSPClient" object):
 void shutdownStream(RTSPClient* rtspClient, int exitCode = 1);
 
+void checkSessionTimeoutBrokenServer(void* clientData);
+
 // A function that outputs a string that identifies each stream (for debugging output).  Modify this if you wish:
 UsageEnvironment& operator<<(UsageEnvironment& env, const RTSPClient& rtspClient) {
   return env << "[URL:\"" << rtspClient.url() << "\"]: ";
@@ -109,6 +111,7 @@ public:
   MediaSession* session;
   MediaSubsession* subsession;
   TaskToken streamTimerTask;
+  TaskToken sessionTimeoutBrokenServerTask;
   double duration;
 };
 
@@ -328,10 +331,10 @@ void continueAfterSETUP(RTSPClient* rtspClient, int resultCode, char* resultStri
 void continueAfterPLAY(RTSPClient* rtspClient, int resultCode, char* resultString) {
   Boolean success = False;
 
-  do {
-    UsageEnvironment& env = rtspClient->envir(); // alias
-    StreamClientState& scs = ((ourRTSPClient*)rtspClient)->scs; // alias
+  UsageEnvironment& env = rtspClient->envir(); // alias
+  StreamClientState& scs = ((ourRTSPClient*)rtspClient)->scs; // alias
 
+  do {
     if (resultCode != 0) {
       env << *rtspClient << "Failed to start playing session: " << resultString << "\n";
       break;
@@ -361,9 +364,34 @@ void continueAfterPLAY(RTSPClient* rtspClient, int resultCode, char* resultStrin
   if (!success) {
     // An unrecoverable error occurred with this stream.
     shutdownStream(rtspClient);
+  } else {
+    scs.sessionTimeoutBrokenServerTask = NULL;
+    checkSessionTimeoutBrokenServer(rtspClient);
   }
 }
 
+void checkSessionTimeoutBrokenServer(void* clientData) {
+
+  RTSPClient* rtspClient = (RTSPClient*)clientData;
+
+  UsageEnvironment& env = rtspClient->envir(); // alias
+  StreamClientState& scs = ((ourRTSPClient*)rtspClient)->scs; // alias
+
+  // Send an "GET_PARAMETER" request, starting with the second call
+  if (scs.sessionTimeoutBrokenServerTask != NULL) {
+    rtspClient->sendGetParameterCommand(*scs.session, NULL, "");
+  }
+
+  unsigned sessionTimeoutParameter= rtspClient->sessionTimeoutParameter();
+
+  unsigned sessionTimeout = sessionTimeoutParameter == 0 ? 60/*default*/ : sessionTimeoutParameter;
+  unsigned secondsUntilNextKeepAlive = sessionTimeout <= 5 ? 1 : sessionTimeout - 5;
+      // Reduce the interval a little, to be on the safe side
+
+  scs.sessionTimeoutBrokenServerTask
+    = env.taskScheduler().scheduleDelayedTask(secondsUntilNextKeepAlive*1000000,
+       (TaskFunc*)checkSessionTimeoutBrokenServer, rtspClient);
+}
 
 // Implementation of the other event handlers:
 
@@ -479,6 +507,7 @@ StreamClientState::~StreamClientState() {
     UsageEnvironment& env = session->envir(); // alias
 
     env.taskScheduler().unscheduleDelayedTask(streamTimerTask);
+    env.taskScheduler().unscheduleDelayedTask(sessionTimeoutBrokenServerTask);
     Medium::close(session);
   }
 }
