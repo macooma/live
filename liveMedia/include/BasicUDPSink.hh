@@ -52,11 +52,14 @@ private:
 
   static void sendNext(void* firstArg);
 
+  static void afterGettingPacket(void* clientData, char* packetData, unsigned packetSize);
+
 private:
   Groupsock* fGS;
   unsigned fMaxPayloadSize;
   unsigned char* fOutputBuffer;
   struct timeval fNextSendTime;
+  u_int16_t fLastRTPSeq;
 };
 
 #endif

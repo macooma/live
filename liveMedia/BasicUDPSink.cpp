@@ -21,6 +21,8 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 #include "BasicUDPSink.hh"
 #include <GroupsockHelper.hh>
 
+//#define DEBUG_OUTPUT_PACKET_LOST
+
 BasicUDPSink* BasicUDPSink::createNew(UsageEnvironment& env, Groupsock* gs,
 				      unsigned maxPayloadSize) {
   return new BasicUDPSink(env, gs, maxPayloadSize);
@@ -31,6 +33,7 @@ BasicUDPSink::BasicUDPSink(UsageEnvironment& env, Groupsock* gs,
   : MediaSink(env),
     fGS(gs), fMaxPayloadSize(maxPayloadSize) {
   fOutputBuffer = new unsigned char[fMaxPayloadSize];
+  fLastRTPSeq = 0;
 }
 
 BasicUDPSink::~BasicUDPSink() {
@@ -52,7 +55,8 @@ void BasicUDPSink::continuePlaying1() {
   if (fSource != NULL) {
     fSource->getNextFrame(fOutputBuffer, fMaxPayloadSize,
 			  afterGettingFrame, this,
-			  onSourceClosure, this);
+			  onSourceClosure, this,
+			  afterGettingPacket);
   }
 }
 
@@ -98,4 +102,24 @@ void BasicUDPSink::afterGettingFrame1(unsigned frameSize, unsigned numTruncatedB
 void BasicUDPSink::sendNext(void* firstArg) {
   BasicUDPSink* sink = (BasicUDPSink*)firstArg;
   sink->continuePlaying1();
+}
+
+void BasicUDPSink::afterGettingPacket(void* clientData, char* packetData, unsigned packetSize)
+{
+#ifdef DEBUG_OUTPUT_PACKET_LOST
+  BasicUDPSink* sink = (BasicUDPSink*)clientData;
+  u_int16_t* seqNumPtr = (u_int16_t*)packetData;
+
+  if (sink->fLastRTPSeq != 0)
+  {
+    if (ntohs(seqNumPtr[1]) - sink->fLastRTPSeq > 1)
+    {
+      sink->envir() << "::: " << ntohs(seqNumPtr[1]) - sink->fLastRTPSeq - 1 << " packets lost :::\n";
+    }
+  }
+  sink->fLastRTPSeq = ntohs(seqNumPtr[1]);
+
+  if (ntohs(seqNumPtr[1]) % 100 == 0)
+    sink->envir() << "Rec RTP seq: " << ntohs(seqNumPtr[1]) << "\n";
+#endif
 }

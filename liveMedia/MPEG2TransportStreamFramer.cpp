@@ -116,7 +116,8 @@ void MPEG2TransportStreamFramer::doGetNextFrame() {
   fFrameSize = 0;
   fInputSource->getNextFrame(fTo, fMaxSize,
 			     afterGettingFrame, this,
-			     FramedSource::handleClosure, this);
+			     FramedSource::handleClosure, this,
+			     (afterGettingPacketFunc*)FramedSource::afterGettingPacket);
 }
 
 void MPEG2TransportStreamFramer::doStopGettingFrames() {
