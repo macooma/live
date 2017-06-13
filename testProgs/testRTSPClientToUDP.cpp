@@ -223,6 +223,30 @@ void continueAfterDESCRIBE(RTSPClient* rtspClient, int resultCode, char* resultS
       break;
     }
 
+    MediaSubsessionIterator subsessionCheckIter(*scs.session);
+    MediaSubsession* subsession = subsessionCheckIter.next();
+    Boolean invalidSubsession = False;
+    unsigned char subsessionCount = 0;
+
+    while (subsession != NULL) {
+      // only MP2T is allowed
+      if (subsession->rtpPayloadFormat() != 33 /* MP2T */) {
+        invalidSubsession = True;
+        break;
+      }
+      subsessionCount++;
+      subsession = subsessionCheckIter.next();
+    }
+    if (invalidSubsession)
+    {
+      env << *rtspClient << "Only MPEG2 Transport Stream is allowed.\n";
+      break;
+    }
+    if (subsessionCount > 1) {
+      env << *rtspClient << "Too many streams\n";
+      break;
+    }
+
     // Then, create and set up our data source objects for the session.  We do this by iterating over the session's 'subsessions',
     // calling "MediaSubsession::initiate()", and then sending a RTSP "SETUP" command, on each one.
     // (Each 'subsession' will have its own data source.)
