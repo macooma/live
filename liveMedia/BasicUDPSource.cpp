@@ -29,7 +29,7 @@ BasicUDPSource* BasicUDPSource::createNew(UsageEnvironment& env,
 BasicUDPSource::BasicUDPSource(UsageEnvironment& env, Groupsock* inputGS)
   : FramedSource(env), fInputGS(inputGS), fHaveStartedReading(False) {
   // Try to use a large receive buffer (in the OS):
-  increaseReceiveBufferTo(env, inputGS->socketNum(), 50*1024);
+  increaseReceiveBufferTo(env, inputGS->socketNum(), 64*1024);
 
   // Make the socket non-blocking, even though it will be read from only asynchronously, when packets arrive.
   // The reason for this is that, in some OSs, reads on a blocking socket can (allegedly) sometimes block,

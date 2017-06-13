@@ -21,7 +21,10 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 #include "liveMedia.hh"
 #include "BasicUsageEnvironment.hh"
 #include "GroupsockHelper.hh"
+#include "MPEG2TransportStreamAccumulator.hh"
 
+#define TRANSPORT_PACKET_SIZE 188
+#define TRANSPORT_PACKETS_PER_NETWORK_PACKET 7
 
 // To set up an internal RTSP server, uncomment the following:
 //#define IMPLEMENT_RTSP_SERVER
@@ -99,7 +102,8 @@ int main(int argc, char** argv) {
   }
 
   // Create a 'framer' for the input source (to give us proper inter-packet gaps):
-  sessionState.videoSource = MPEG2TransportStreamFramer::createNew(*env, udpSource);
+  sessionState.videoSource = MPEG2TransportStreamAccumulator::createNew(*env, udpSource,
+                    TRANSPORT_PACKET_SIZE * TRANSPORT_PACKETS_PER_NETWORK_PACKET);
 
   /*
    * 4. Finally, start playing.

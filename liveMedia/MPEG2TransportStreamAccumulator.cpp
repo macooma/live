@@ -35,7 +35,7 @@ MPEG2TransportStreamAccumulator
 ::MPEG2TransportStreamAccumulator(UsageEnvironment& env,
 				  FramedSource* inputSource, unsigned maxPacketSize)
   : FramedFilter(env, inputSource),
-    fDesiredPacketSize(maxPacketSize < TRANSPORT_PACKET_SIZE ? TRANSPORT_PACKET_SIZE : (maxPacketSize/TRANSPORT_PACKET_SIZE)),
+    fDesiredPacketSize(maxPacketSize < TRANSPORT_PACKET_SIZE ? TRANSPORT_PACKET_SIZE : (maxPacketSize/TRANSPORT_PACKET_SIZE)*TRANSPORT_PACKET_SIZE),
     fNumBytesGathered(0) {
 }
 
