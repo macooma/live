@@ -24,7 +24,7 @@ LIBS_FOR_GUI_APPLICATION =
 EXE =
 ##### End of variables to change
 
-MULTICAST_STREAMER_APPS = testMP3Streamer$(EXE) testMPEG1or2VideoStreamer$(EXE) testMPEG1or2AudioVideoStreamer$(EXE) testMPEG2TransportStreamer$(EXE) testMPEG2TransportUDP2RTP$(EXE) testMPEG4VideoStreamer$(EXE) testH264VideoStreamer$(EXE) testH265VideoStreamer$(EXE) testDVVideoStreamer$(EXE) testWAVAudioStreamer$(EXE) testAMRAudioStreamer$(EXE) testMKVStreamer$(EXE) testOggStreamer$(EXE) vobStreamer$(EXE)
+MULTICAST_STREAMER_APPS = testMP3Streamer$(EXE) testMPEG1or2VideoStreamer$(EXE) testMPEG1or2AudioVideoStreamer$(EXE) testMPEG2TransportStreamer$(EXE) testMPEG2TransportUDP2RTP$(EXE) testMPEG4VideoStreamer$(EXE) testH264VideoStreamer$(EXE) testH265VideoStreamer$(EXE) testDVVideoStreamer$(EXE) testWAVAudioStreamer$(EXE) testAMRAudioStreamer$(EXE) testMKVStreamer$(EXE) testOggStreamer$(EXE) vobStreamer$(EXE) testMPEG2TransportStreamerTS2UDP$(EXE)
 MULTICAST_RECEIVER_APPS = testMP3Receiver$(EXE) testMPEG1or2VideoReceiver$(EXE) testMPEG2TransportReceiver$(EXE) testMPEG2TransportRTP2UDP$(EXE) sapWatch$(EXE)
 MULTICAST_MISC_APPS = testRelay$(EXE) testReplicator$(EXE)
 MULTICAST_APPS = $(MULTICAST_STREAMER_APPS) $(MULTICAST_RECEIVER_APPS) $(MULTICAST_MISC_APPS)
@@ -57,6 +57,7 @@ MPEG2_TRANSPORT_RECEIVER_OBJS = testMPEG2TransportReceiver.$(OBJ)
 MPEG2_TRANSPORT_RTP2UDP_OBJS = testMPEG2TransportRTP2UDP.$(OBJ)
 MPEG_1OR2_AUDIO_VIDEO_STREAMER_OBJS = testMPEG1or2AudioVideoStreamer.$(OBJ)
 MPEG2_TRANSPORT_STREAMER_OBJS = testMPEG2TransportStreamer.$(OBJ)
+MPEG2_TRANSPORT_STREAMER_TS2UDP_OBJS = testMPEG2TransportStreamerTS2UDP.$(OBJ)
 MPEG2_TRANSPORT_UDP2RTP_OBJS = testMPEG2TransportUDP2RTP.$(OBJ)
 MPEG4_VIDEO_STREAMER_OBJS = testMPEG4VideoStreamer.$(OBJ)
 H264_VIDEO_STREAMER_OBJS = testH264VideoStreamer.$(OBJ)
@@ -117,6 +118,8 @@ testMPEG1or2AudioVideoStreamer$(EXE):	$(MPEG_1OR2_AUDIO_VIDEO_STREAMER_OBJS) $(L
 	$(LINK)$@ $(CONSOLE_LINK_OPTS) $(MPEG_1OR2_AUDIO_VIDEO_STREAMER_OBJS) $(LIBS)
 testMPEG2TransportStreamer$(EXE):	$(MPEG2_TRANSPORT_STREAMER_OBJS) $(LOCAL_LIBS)
 	$(LINK)$@ $(CONSOLE_LINK_OPTS) $(MPEG2_TRANSPORT_STREAMER_OBJS) $(LIBS)
+testMPEG2TransportStreamerTS2UDP$(EXE):	$(MPEG2_TRANSPORT_STREAMER_TS2UDP_OBJS) $(LOCAL_LIBS)
+	$(LINK)$@ $(CONSOLE_LINK_OPTS) $(MPEG2_TRANSPORT_STREAMER_TS2UDP_OBJS) $(LIBS)
 testMPEG2TransportUDP2RTP$(EXE):	$(MPEG2_TRANSPORT_UDP2RTP_OBJS) $(LOCAL_LIBS)
 	$(LINK)$@ $(CONSOLE_LINK_OPTS) $(MPEG2_TRANSPORT_UDP2RTP_OBJS) $(LIBS)
 testMPEG2TransportReceiver$(EXE):	$(MPEG2_TRANSPORT_RECEIVER_OBJS) $(LOCAL_LIBS)
