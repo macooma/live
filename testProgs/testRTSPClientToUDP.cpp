@@ -324,7 +324,7 @@ void continueAfterSETUP(RTSPClient* rtspClient, int resultCode, char* resultStri
     // Create 'groupsocks' for UDP sender:
     struct in_addr sendAddress;
     sendAddress.s_addr = our_inet_addr("239.0.0.1");
-    const Port sendPort(5004);
+    const Port sendPort(65004);
     Groupsock *sendGroupsock = new Groupsock(env, sendAddress, sendPort, 1);
 
     // Create the data sink : a MPEG-2 TranksportStream UDP sink

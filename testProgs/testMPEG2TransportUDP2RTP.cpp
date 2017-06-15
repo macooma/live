@@ -57,8 +57,8 @@ int main(int argc, char** argv) {
   // Create 'groupsocks' for RTP and RTCP sender:
   struct in_addr sendAddress;
   sendAddress.s_addr = our_inet_addr("239.255.42.42");
-  const Port rtpPort(1234);
-  const Port rtcpPort(1235);
+  const Port rtpPort(61234);
+  const Port rtcpPort(61235);
   Groupsock rtpGroupsock(*env, sendAddress, rtpPort, 7 /* ttl */);
   Groupsock rtcpGroupsock(*env, sendAddress, rtcpPort, 7 /* ttl */);
 
@@ -91,7 +91,7 @@ int main(int argc, char** argv) {
   // Create 'groupsocks' for UDP receiver:
   struct in_addr receiveAddress;
   receiveAddress.s_addr = our_inet_addr("239.0.0.1");
-  const Port receivePort(5004);
+  const Port receivePort(65004);
   Groupsock receiveGroupsock(*env, receiveAddress, receivePort, 7 /* ttl */);
 
   // Create data source: a MPEG-2 TransportStream UDP source
@@ -127,7 +127,7 @@ void afterPlaying(void* /*clientData*/) {
 }
 
 void initRTSPServer() {
-  RTSPServer* rtspServer = RTSPServer::createNew(*env, Port(1554));
+  RTSPServer* rtspServer = RTSPServer::createNew(*env, Port(60554));
   if (rtspServer == NULL) {
     *env << "Failed to create RTSP server: " << env->getResultMsg() << "\n";
     exit(1);

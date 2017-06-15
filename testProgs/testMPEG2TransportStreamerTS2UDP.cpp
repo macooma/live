@@ -21,7 +21,6 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 #include "liveMedia.hh"
 #include "BasicUsageEnvironment.hh"
 #include "GroupsockHelper.hh"
-#include "MPEG2TransportStreamAccumulator.hh"
 
 // To stream using "source-specific multicast" (SSM), uncomment the following:
 //#define USE_SSM 1
@@ -53,7 +52,7 @@ int main(int argc, char** argv) {
   // unicast instead, then replace this string with the unicast address
   // of the (single) destination.  (You may also need to make a similar
   // change to the receiver program.)
-  const unsigned short destport = 5004;
+  const unsigned short destport = 65004;
   const unsigned char ttl = 7; // low, in case routers don't admin scope
 
   struct in_addr destinationAddress;
@@ -99,7 +98,7 @@ void play() {
   }
 
   // Create a 'framer' for the input source (to give us proper inter-packet gaps):
-  videoSource = MPEG2TransportStreamAccumulator::createNew(*env, fileSource, 188*7);
+  videoSource = MPEG2TransportStreamFramer::createNew(*env, fileSource);
 
   // Finally, start playing:
   *env << "Beginning to read from file...\n";

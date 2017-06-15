@@ -49,7 +49,7 @@ int main(int argc, char** argv) {
   // Create 'groupsocks' for UDP sender:
   struct in_addr sendAddress;
   sendAddress.s_addr = our_inet_addr("239.0.0.1");
-  const Port sendPort(5004);
+  const Port sendPort(65004);
   Groupsock sendGroupsock(*env, sendAddress, sendPort, 1);
 
   // Create the data sink : a MPEG-2 TranksportStream UDP sink
@@ -61,8 +61,8 @@ int main(int argc, char** argv) {
   // Create 'groupsocks' for RTP and RTCP receiver:
   struct in_addr receiveAddress;
   receiveAddress.s_addr = our_inet_addr("239.255.42.42");
-  const Port rtpPort(1234);
-  const Port rtcpPort(1235);
+  const Port rtpPort(61234);
+  const Port rtcpPort(61235);
   Groupsock rtpGroupsock(*env, receiveAddress, rtpPort, 1);
   Groupsock rtcpGroupsock(*env, receiveAddress, rtcpPort, 1);
 
