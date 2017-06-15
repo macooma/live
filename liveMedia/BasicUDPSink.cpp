@@ -21,7 +21,7 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 #include "BasicUDPSink.hh"
 #include <GroupsockHelper.hh>
 
-//#define DEBUG_OUTPUT_PACKET_LOST
+#define DEBUG_OUTPUT_PACKET_LOST
 
 BasicUDPSink* BasicUDPSink::createNew(UsageEnvironment& env, Groupsock* gs,
 				      unsigned maxPayloadSize) {
