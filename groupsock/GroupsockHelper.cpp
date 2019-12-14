@@ -398,10 +398,12 @@ static unsigned setBufferTo(UsageEnvironment& env, int bufOptName,
 }
 unsigned setSendBufferTo(UsageEnvironment& env,
 			 int socket, unsigned requestedSize) {
+	printf("\n==== Set SO_SNDBUF to %d ====\n\n", requestedSize);
 	return setBufferTo(env, SO_SNDBUF, socket, requestedSize);
 }
 unsigned setReceiveBufferTo(UsageEnvironment& env,
 			    int socket, unsigned requestedSize) {
+	printf("\n==== Set SO_RCVBUF to %d ====\n\n", requestedSize);
 	return setBufferTo(env, SO_RCVBUF, socket, requestedSize);
 }
 
@@ -410,6 +412,12 @@ static unsigned increaseBufferTo(UsageEnvironment& env, int bufOptName,
   // First, get the current buffer size.  If it's already at least
   // as big as what we're requesting, do nothing.
   unsigned curSize = getBufferSize(env, bufOptName, socket);
+  const char *label = "unknown";
+
+  if (bufOptName == SO_SNDBUF)
+    label = "SO_SNDBUF";
+  else if (bufOptName == SO_RCVBUF)
+    label = "SO_RCVBUF";
 
   // Next, try to increase the buffer to the requested size,
   // or to some smaller size, if that's not possible:
@@ -418,6 +426,7 @@ static unsigned increaseBufferTo(UsageEnvironment& env, int bufOptName,
     if (setsockopt(socket, SOL_SOCKET, bufOptName,
 		   (char*)&requestedSize, sizeSize) >= 0) {
       // success
+      printf("\n==== Set %s to %d ====\n\n", label, requestedSize);
       return requestedSize;
     }
     requestedSize = (requestedSize+curSize)/2;

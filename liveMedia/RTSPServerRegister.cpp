@@ -62,7 +62,7 @@ public:
 
       grabConnection(sock, remoteAddress);
       if (sock >= 0) {
-	increaseSendBufferTo(envir(), sock, 50*1024); // in anticipation of streaming over it
+	increaseSendBufferTo(envir(), sock, 512*1024); // in anticipation of streaming over it
 	(void)fOurServer.createNewClientConnection(sock, remoteAddress);
       }
     }

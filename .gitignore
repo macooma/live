@@ -38,3 +38,4 @@ testProgs/testLiveRTSPSession
 testProgs/testMPEG2TransportRTP2UDP
 testProgs/testMPEG2TransportUDP2RTP
 testProgs/testRTSPClientToUDP
+testProgs/testMPEG2TransportStreamerTS2UDP

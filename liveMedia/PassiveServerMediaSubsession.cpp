@@ -180,7 +180,7 @@ void PassiveServerMediaSubsession::startStream(unsigned clientSessionId,
   // specified bandwidth and at least 50 KB
   unsigned streamBitrate = fRTCPInstance == NULL ? 50 : fRTCPInstance->totSessionBW(); // in kbps
   unsigned rtpBufSize = streamBitrate * 25 / 2; // 1 kbps * 0.1 s = 12.5 bytes
-  if (rtpBufSize < 50 * 1024) rtpBufSize = 50 * 1024;
+  if (rtpBufSize < 512 * 1024) rtpBufSize = 512 * 1024;
   increaseSendBufferTo(envir(), fRTPSink.groupsockBeingUsed().socketNum(), rtpBufSize);
 
   if (fRTCPInstance != NULL) {

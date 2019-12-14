@@ -153,7 +153,7 @@ int GenericMediaServer::setUpOurSocket(UsageEnvironment& env, Port& ourPort) {
     if (ourSocket < 0) break;
     
     // Make sure we have a big send buffer:
-    if (!increaseSendBufferTo(env, ourSocket, 50*1024)) break;
+    if (!increaseSendBufferTo(env, ourSocket, 512*1024)) break;
     
     // Allow multiple simultaneous connections:
     if (listen(ourSocket, LISTEN_BACKLOG_SIZE) < 0) {
@@ -194,7 +194,7 @@ void GenericMediaServer::incomingConnectionHandlerOnSocket(int serverSocket) {
   }
   ignoreSigPipeOnSocket(clientSocket); // so that clients on the same host that are killed don't also kill us
   makeSocketNonBlocking(clientSocket);
-  increaseSendBufferTo(envir(), clientSocket, 50*1024);
+  increaseSendBufferTo(envir(), clientSocket, 512*1024);
   
 #ifdef DEBUG
   envir() << "accept()ed connection from " << AddressString(clientAddr).val() << "\n";
